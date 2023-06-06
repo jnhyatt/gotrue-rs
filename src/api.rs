@@ -134,9 +134,7 @@ impl Api {
         email_or_phone: EmailOrPhone,
         password: &String,
     ) -> Result<Session, reqwest::Error> {
-        let query_string = String::from("?grant_type=password");
-
-        let endpoint = format!("{}/token{}", self.url, query_string);
+        let endpoint = format!("{}/token", self.url);
 
         let body = match email_or_phone {
             EmailOrPhone::Email(email) => json!({
@@ -152,6 +150,7 @@ impl Api {
         let response: Session = self
             .client
             .post(endpoint)
+            .query(&[("grant_type", "password")])
             .headers(self.headers.clone())
             .json(&body)
             .send()
