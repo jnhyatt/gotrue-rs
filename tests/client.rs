@@ -1,4 +1,4 @@
-use go_true::{Client, EmailOrPhone, UserAttributes};
+use go_true_redux::{Client, EmailOrPhone, UserAttributes};
 use rand::{distributions::Alphanumeric, Rng};
 use serde_json::json;
 use std::error::Error;
@@ -47,7 +47,7 @@ async fn it_should_throw_email_already_taken_error() -> Result<(), Box<dyn Error
 
     match result {
         Ok(_) => panic!("Should throw error"),
-        Err(e) => assert!(matches!(e, go_true::Error::AlreadySignedUp)),
+        Err(e) => assert!(matches!(e, go_true_redux::Error::AlreadySignedUp)),
     }
 
     Ok(())
@@ -86,7 +86,7 @@ async fn it_should_return_error_when_credentials_are_wrong_on_signin() -> Result
 
     match result {
         Ok(_) => panic!("Should throw error"),
-        Err(e) => assert!(matches!(e, go_true::Error::WrongCredentials)),
+        Err(e) => assert!(matches!(e, go_true_redux::Error::WrongCredentials)),
     }
 
     Ok(())
@@ -99,7 +99,7 @@ async fn it_should_return_error_if_no_session_when_refreshing() -> Result<(), Bo
 
     match result {
         Ok(_) => panic!("Should throw error"),
-        Err(e) => assert!(matches!(e, go_true::Error::NotAuthenticated)),
+        Err(e) => assert!(matches!(e, go_true_redux::Error::NotAuthenticated)),
     }
 
     Ok(())
@@ -151,7 +151,7 @@ async fn it_does_not_send_magic_link_with_invalid_email() -> Result<(), Box<dyn 
 
     match result {
         Ok(_) => panic!("Should throw error"),
-        Err(e) => assert!(matches!(e, go_true::Error::UserNotFound)),
+        Err(e) => assert!(matches!(e, go_true_redux::Error::UserNotFound)),
     }
 
     Ok(())
@@ -181,7 +181,7 @@ async fn it_should_return_error_in_log_out_if_no_session() -> Result<(), Box<dyn
 
     match result {
         Ok(_) => panic!("Should throw error"),
-        Err(e) => assert!(matches!(e, go_true::Error::NotAuthenticated)),
+        Err(e) => assert!(matches!(e, go_true_redux::Error::NotAuthenticated)),
     }
 
     Ok(())

@@ -1,4 +1,4 @@
-use go_true::{Api, EmailOrPhone, UserAttributes};
+use go_true_redux::{Api, EmailOrPhone, UserAttributes};
 use rand::{distributions::Alphanumeric, Rng};
 use serde_json::json;
 use std::error::Error;

@@ -1,12 +1,12 @@
 [package]
-name = "go_true"
+name = "go_true_redux"
 version = "0.1.1"
 edition = "2021"
-authors = ["Fabian Kutsche <kutschefabian@gmail.com>"]
+authors = ["Johnathan Walker <j7n.w4r@gmail.com>"]
 description = "GoTrue client written in rust"
 license = "MIT"
-homepage = "https://github.com/Fubinator/gotrue-rs"
-repository = "https://github.com/Fubinator/gotrue-rs"
+homepage = "https://github.com/j7nw4r/gotrue-rs-redux"
+repository = "https://github.com/j7nw4r/gotrue-rs-redux"
 readme = "README.md"
 keywords = ["gotrue", "rest", "api", "supabase"]
 categories = ["development-tools"]
