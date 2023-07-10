@@ -1,8 +1,11 @@
 # gotrue-rs
 
-[![Rust](https://github.com/Fubinator/gotrue-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/Fubinator/gotrue-rs/actions/workflows/ci.yml)
-[![Crate](https://img.shields.io/crates/v/go_true.svg)](https://crates.io/crates/go_true)
-[![License: MIT](https://img.shields.io/crates/l/go_true.svg)](#license)
+> :exclamation: This is a fork of [Fubinator's gotrue-rs](https://github.com/Fubinator/gotrue-rs). While functionally similar, it has breaking API changes and a more expansive documentation. Credit is given to Fubinator for a vast majority of the development.
+
+
+[![Rust](https://github.com/j7nw4r/gotrue-rs-redux/actions/workflows/ci.yml/badge.svg)](https://github.com/j7nw4r/gotrue-rs-redux/actions/workflows/ci.yml)
+[![Crate](https://img.shields.io/crates/v/go_true_redux.svg)](https://crates.io/crates/go_true_redux)
+[![License: MIT](https://img.shields.io/crates/l/go_true_redux.svg)](#license)
 
 This is a [GoTrue](https://github.com/supabase/gotrue) client implementation in rust. The library is currently under development. Most of the features are already built in, but there are still some changes to be made and everything still needs to be documented. 
 
@@ -10,7 +13,7 @@ This is a [GoTrue](https://github.com/supabase/gotrue) client implementation in 
 Add the following line to your `Cargo.toml`:
 
 ```toml
-go_true = "0.1.1"
+go_true = "0.2.0"
 ```
 
 ## Examples
@@ -34,7 +37,7 @@ async fn main() {
 }
 ```
 
-For more information, check out the [API docs](https://docs.rs/go_true/0.1.0/go_true/)!
+For more information, check out the [API docs](https://docs.rs/go_true/0.2.0/go_true/)!
 
 ## Testing
 
@@ -53,4 +56,4 @@ cargo test --tests
 
 ## Contributing
 
-Contributions, issues and feature requests are welcome. Feel free to check out the [issues page](https://github.com/Fubinator/gotrue-rs/issues) if you want to contribute.
+Contributions, issues and feature requests are welcome. Feel free to check out the [issues page](https://github.com/j7nw4r/gotrue-rs-redux) if you want to contribute.
