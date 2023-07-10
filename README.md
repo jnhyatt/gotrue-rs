@@ -1,4 +1,4 @@
-# gotrue-rs
+# gotrue-rs-redux
 
 > :exclamation: This is a fork of [Fubinator's gotrue-rs](https://github.com/Fubinator/gotrue-rs). While functionally similar, it has breaking API changes and a more expansive documentation. Credit is given to Fubinator for a vast majority of the development.
 
@@ -13,7 +13,7 @@ This is a [GoTrue](https://github.com/supabase/gotrue) client implementation in 
 Add the following line to your `Cargo.toml`:
 
 ```toml
-go_true = "0.2.1"
+go_true_redux = "0.2.2"
 ```
 
 ## Examples
@@ -21,7 +21,7 @@ go_true = "0.2.1"
 To create an account, create a new client and execute the `sign_up` function with email and password:
 
 ```rust
-use go_true::Client;
+use go_true_redux::Client;
 
 #[tokio::main]
 async fn main() {
@@ -37,7 +37,7 @@ async fn main() {
 }
 ```
 
-For more information, check out the [API docs](https://docs.rs/go_true/0.2.0/go_true/)!
+For more information, check out the [API docs](https://docs.rs/go_true_redux/0.2.2/go_true_redux/)!
 
 ## Testing
 
