@@ -4,6 +4,7 @@ use thiserror::Error;
 /// Represents a error returned from a user action by GoTrue.
 ///
 #[derive(Error, Debug)]
+#[non_exhaustive]
 pub enum Error {
     /// The user has already signed up.
     #[error("Use already signed up.")]
