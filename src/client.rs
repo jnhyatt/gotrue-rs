@@ -11,7 +11,6 @@ use crate::{
 ///
 #[derive(Debug, Clone)]
 pub struct Client {
-    current_session: Option<Session>,
     api: Api,
 }
 
@@ -26,10 +25,7 @@ impl Client {
     /// let client = Client::new("http://your.gotrue.endpoint");
     /// ```
     pub fn new(url: &str) -> Client {
-        Client {
-            current_session: None,
-            api: Api::new(url),
-        }
+        Client { api: Api::new(url) }
     }
 
     /// Signs up a new user.
@@ -54,14 +50,10 @@ impl Client {
         email_or_phone: EmailOrPhone,
         password: &str,
     ) -> Result<Session, Error> {
-        self.current_session = None;
         let result = self.api.sign_up(email_or_phone, password).await;
 
         match result {
-            Ok(session) => {
-                self.current_session = Some(session.clone());
-                Ok(session)
-            }
+            Ok(session) => Ok(session),
             Err(e) => {
                 if e.is_status() && e.status().unwrap().as_str() == "400" {
                     return Err(Error::AlreadySignedUp);
@@ -93,14 +85,10 @@ impl Client {
         email_or_phone: EmailOrPhone,
         password: &str,
     ) -> Result<Session, Error> {
-        self.current_session = None;
         let result = self.api.sign_in(email_or_phone, password).await;
 
         match result {
-            Ok(session) => {
-                self.current_session = Some(session.clone());
-                Ok(session)
-            }
+            Ok(session) => Ok(session),
             Err(e) => {
                 if e.is_status() && e.status().unwrap().as_str() == "400" {
                     Err(Error::WrongCredentials)
@@ -149,7 +137,6 @@ impl Client {
 
     /// Verifies an OTP request.
     pub async fn verify_otp<T: serde::Serialize>(&mut self, params: T) -> Result<bool, Error> {
-        self.current_session = None;
         let result = self.api.verify_otp(params).await;
 
         match result {
@@ -180,13 +167,8 @@ impl Client {
     ///     let res = client.sign_out().await?;
     ///     Ok(())
     /// }
-    pub async fn sign_out(&self) -> Result<bool, Error> {
-        let result = match &self.current_session {
-            Some(session) => self.api.sign_out(&session.access_token).await,
-            None => return Err(Error::NotAuthenticated),
-        };
-
-        match result {
+    pub async fn sign_out(&self, access_token: &str) -> Result<bool, Error> {
+        match self.api.sign_out(access_token).await {
             Ok(_) => Ok(true),
             Err(_) => Err(Error::InternalError),
         }
@@ -217,13 +199,12 @@ impl Client {
     }
 
     /// Update a user.
-    pub async fn update_user(&self, user: UserAttributes) -> Result<UserUpdate, Error> {
-        let session = match &self.current_session {
-            Some(s) => s,
-            None => return Err(Error::NotAuthenticated),
-        };
-
-        let result = self.api.update_user(user, &session.access_token).await;
+    pub async fn update_user(
+        &self,
+        access_token: &str,
+        user: UserAttributes,
+    ) -> Result<UserUpdate, Error> {
+        let result = self.api.update_user(user, access_token).await;
 
         match result {
             Ok(user) => Ok(user),
@@ -253,42 +234,7 @@ impl Client {
     ///     client.refresh_session().await?:
     ///     Ok(())
     /// }
-    pub async fn refresh_session(&mut self) -> Result<Session, Error> {
-        if self.current_session.is_none() {
-            return Err(Error::NotAuthenticated);
-        }
-
-        let result = match &self.current_session {
-            Some(session) => self.api.refresh_access_token(&session.refresh_token).await,
-            None => return Err(Error::MissingRefreshToken),
-        };
-
-        let session = match result {
-            Ok(session) => session,
-            Err(_) => return Err(Error::InternalError),
-        };
-
-        self.current_session = Some(session.clone());
-
-        Ok(session)
-    }
-
-    /// Sets a session by refresh token
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use go_true::{Client};
-    ///
-    /// #[tokio::main]
-    ///     async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let client = Client::new("http://your.gotrue.endpoint".to_string());
-    ///     let token = "refresh_token".to_string();
-    ///
-    ///     let session = client.set_session(token).await?:
-    ///     Ok(())
-    /// }
-    pub async fn set_session(&mut self, refresh_token: &str) -> Result<Session, Error> {
+    pub async fn refresh_session(&mut self, refresh_token: &str) -> Result<Session, Error> {
         if refresh_token.is_empty() {
             return Err(Error::NotAuthenticated);
         }
@@ -299,8 +245,6 @@ impl Client {
             Ok(session) => session,
             Err(_) => return Err(Error::InternalError),
         };
-
-        self.current_session = Some(session.clone());
 
         Ok(session)
     }

@@ -95,7 +95,7 @@ async fn it_should_return_error_when_credentials_are_wrong_on_signin() -> Result
 #[tokio::test]
 async fn it_should_return_error_if_no_session_when_refreshing() -> Result<(), Box<dyn Error>> {
     let mut client = get_client();
-    let result = client.refresh_session().await;
+    let result = client.refresh_session("").await;
 
     match result {
         Ok(_) => panic!("Should throw error"),
@@ -118,7 +118,7 @@ async fn it_should_refresh_session() -> Result<(), Box<dyn Error>> {
         .sign_in(EmailOrPhone::Email(email.clone()), password)
         .await?;
 
-    let session = client.refresh_session().await?;
+    let session = client.refresh_session(&old_session.refresh_token).await?;
 
     assert_eq!(session.user.email, email);
     assert_ne!(old_session.refresh_token, session.refresh_token);
@@ -166,9 +166,9 @@ async fn it_should_log_out() -> Result<(), Box<dyn Error>> {
     let _throw_away_signup_result = client
         .sign_up(EmailOrPhone::Email(email.clone()), password)
         .await?;
-    let _throw_away_signin_result = client.sign_in(EmailOrPhone::Email(email), password).await?;
+    let signin_result = client.sign_in(EmailOrPhone::Email(email), password).await?;
 
-    let success = client.sign_out().await?;
+    let success = client.sign_out(&signin_result.access_token).await?;
 
     assert!(success);
     Ok(())
@@ -177,7 +177,7 @@ async fn it_should_log_out() -> Result<(), Box<dyn Error>> {
 #[tokio::test]
 async fn it_should_return_error_in_log_out_if_no_session() -> Result<(), Box<dyn Error>> {
     let client = get_client();
-    let result = client.sign_out().await;
+    let result = client.sign_out("").await;
 
     match result {
         Ok(_) => panic!("Should throw error"),
@@ -220,25 +220,11 @@ async fn it_should_update_user() -> Result<(), Box<dyn Error>> {
         data: json!({ "test": "test" }),
     };
 
-    let update = client.update_user(attributes).await?;
-
-    assert_eq!(update.new_email, new_email);
-
-    Ok(())
-}
-
-#[tokio::test]
-async fn it_should_set_session_by_refresh_token() -> Result<(), Box<dyn Error>> {
-    let email = get_random_email();
-    let password = "Abcd1234!";
-
-    let mut client = get_client();
-    let old_session = client
-        .sign_up(EmailOrPhone::Email(email.clone()), password)
+    let update = client
+        .update_user(&_throw_away_signin_result.access_token, attributes)
         .await?;
 
-    let session = client.set_session(&old_session.refresh_token).await?;
-    assert_eq!(old_session.user.email, session.user.email);
+    assert_eq!(update.new_email, new_email);
 
     Ok(())
 }

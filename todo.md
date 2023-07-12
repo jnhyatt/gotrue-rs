@@ -2,12 +2,11 @@
 
 GoTrue exposes the following endpoints:
 
-## **GET `/settings`**
+### **GET `/settings`**
 
 Returns the publicly available settings for this gotrue instance.
 
 <details>
-<summary>Request/Response</summary>
 ### Response
 
 ```json
@@ -42,6 +41,7 @@ Returns the publicly available settings for this gotrue instance.
 
 Creates (POST) the user based on the `user_id` specified. The `ban_duration` field accepts the following time units: "ns", "us", "ms", "s", "m", "h". See [`time.ParseDuration`](https://pkg.go.dev/time#ParseDuration) for more details on the format used.
 
+<details>
 ### Request
 
 ```js
@@ -63,11 +63,14 @@ body:
   "ban_duration": "24h" or "none" // to unban a user
 }
 ```
+</details>
 
 ## **PUT `/admin/users/<user_id>`**
 
 Updates (PUT) the user based on the `user_id` specified. The `ban_duration` field accepts the following time units: "ns", "us", "ms", "s", "m", "h". See [`time.ParseDuration`](https://pkg.go.dev/time#ParseDuration) for more details on the format used.
 
+
+<details>
 ### Request
 
 ```js
@@ -89,11 +92,13 @@ body:
   "ban_duration": "24h" or "none" // to unban a user
 }
 ```
+</details>
 
 ## **POST `/admin/generate_link`**
 
 Returns the corresponding email action link based on the type specified. Among other things, the response also contains the query params of the action link as separate JSON fields for convenience (along with the email OTP from which the corresponding token is generated).
 
+<details>
 ### Request
 
 ```js
@@ -127,11 +132,13 @@ Returns
   ...
 }
 ```
+</details>
 
 ## **POST `/signup`**
 
 Register a new user with an email and password.
 
+<details>
 ```js
 {
   "email": "email@example.com",
@@ -184,12 +191,14 @@ if AUTOCONFIRM is enabled and the sign up is a duplicate, then the endpoint will
   "msg":"User already registered"
 }
 ```
+</details>
 
 ## **POST `/invite`**
 
 Invites a new user with an email.
 This endpoint requires the `service_role` or `supabase_admin` JWT set as an Auth Bearer header:
 
+<details>
 e.g.
 
 ```json
@@ -216,11 +225,14 @@ Returns:
   "invited_at": "2016-05-15T19:53:12.368652374-07:00"
 }
 ```
+</details>
 
 ## **POST `/verify`**
 
 Verify a registration or a password recovery. Type can be `signup` or `recovery` or `invite`
 and the `token` is a token returned from either `/signup` or `/recover`.
+
+<details>
 
 ```json
 {
@@ -264,11 +276,14 @@ Returns:
   "refresh_token": "a-refresh-token"
 }
 ```
+</details>
 
 ## **GET `/verify`**
 
 Verify a registration or a password recovery. Type can be `signup` or `recovery` or `magiclink` or `invite`
 and the `token` is a token returned from either `/signup` or `/recover` or `/magiclink`.
+
+<details>
 
 query params:
 
@@ -290,6 +305,7 @@ Your app should detect the query params in the fragment and use them to set the 
 
 You can use the `type` param to redirect the user to a password set form in the case of `invite` or `recovery`,
 or show an account confirmed/welcome message in the case of `signup`, or direct them to some additional onboarding flow
+</details>
 
 ## **POST `/otp`**
 
@@ -297,7 +313,9 @@ One-Time-Password. Will deliver a magiclink or sms otp to the user depending on 
 
 If `"create_user": true`, user will not be automatically signed up if the user doesn't exist.
 
-```js
+<details>
+
+```json
 {
   "phone": "12345678" // follows the E.164 format
   "create_user": true
@@ -317,6 +335,7 @@ Returns:
 ```json
 {}
 ```
+</details>
 
 ## **POST `/magiclink`** (recommended to use /otp instead. See above.)
 
@@ -324,6 +343,8 @@ Magic Link. Will deliver a link (e.g. `/verify?type=magiclink&token=fgtyuf68ddqd
 email address which they can use to redeem an access_token.
 
 By default Magic Links can only be sent once every 60 seconds
+
+<details>
 
 ```json
 {
@@ -339,6 +360,8 @@ Returns:
 
 when clicked the magic link will redirect the user to `<SITE_URL>#access_token=x&refresh_token=y&expires_in=z&token_type=bearer&type=magiclink` (see `/verify` above)
 
+</details>
+
 ## **POST `/recover`**
 
 Password recovery. Will deliver a password recovery mail to the user based on
@@ -346,6 +369,7 @@ email address.
 
 By default recovery links can only be sent once every 60 seconds
 
+<details>
 ```json
 {
   "email": "email@example.com"
@@ -358,10 +382,14 @@ Returns:
 {}
 ```
 
+</details>
+
 ## **POST `/token`**
 
 This is an OAuth2 endpoint that currently implements
 the password and refresh_token grant types
+
+<details>
 
 query params:
 
@@ -414,10 +442,13 @@ Returns:
   "refresh_token": "a-refresh-token"
 }
 ```
+</details>
 
 ## **GET `/user`**
 
 Get the JSON object for the logged in user (requires authentication)
+
+<details>
 
 Returns:
 
@@ -430,11 +461,14 @@ Returns:
   "updated_at": "2016-05-15T19:53:12.368652374-07:00"
 }
 ```
+</details>
 
 ## **PUT `/user`**
 
 Update a user (Requires authentication). Apart from changing email/password, this
 method can be used to set custom user data. Changing the email will result in a magiclink being sent out.
+
+<details>
 
 ```json
 {
@@ -471,16 +505,20 @@ If `GOTRUE_SECURITY_UPDATE_PASSWORD_REQUIRE_REAUTHENTICATION` is enabled, the us
   "nonce": "123456"
 }
 ```
+</details>
 
 ## **GET `/reauthenticate`**
 
 Sends a nonce to the user's email (preferred) or phone. This endpoint requires the user to be logged in / authenticated first. The user needs to have either an email or phone number for the nonce to be sent successfully.
+
+<details>
 
 ```json
 headers: {
   "Authorization" : "Bearer eyJhbGciOiJI...M3A90LCkxxtX9oNP9KZO"
 }
 ```
+</details>
 
 ## **POST `/logout`**
 
@@ -492,6 +530,8 @@ will still be valid for stateless auth until they expires.
 ## **GET `/authorize`**
 
 Get access_token from external oauth provider
+
+<details>
 
 query params:
 
@@ -505,12 +545,18 @@ Redirects to provider and then to `/callback`
 
 For apple specific setup see: <https://github.com/supabase/gotrue#apple-oauth>
 
+</details>
+
 ## **GET `/callback`**
 
 External provider should redirect to here
+
+<details>
 
 Redirects to 
 ```plaintext
 <GOTRUE_SITE_URL>#access_token=<access_token>&refresh_token=<refresh_token>&provider_token=<provider_oauth_token>&expires_in=3600&provider=<provider_name>
 ```
 If additional scopes were requested then `provider_token` will be populated, you can use this to fetch additional data from the provider or interact with their services
+
+</details>
