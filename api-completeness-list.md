@@ -37,7 +37,7 @@ Returns the publicly available settings for this gotrue instance.
 </details>
 
 
-## **POST `/admin/users/<user_id>`**
+### **POST `/admin/users/<user_id>`**
 
 Creates (POST) the user based on the `user_id` specified. The `ban_duration` field accepts the following time units: "ns", "us", "ms", "s", "m", "h". See [`time.ParseDuration`](https://pkg.go.dev/time#ParseDuration) for more details on the format used.
 

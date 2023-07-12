@@ -43,6 +43,95 @@ impl Api {
         }
     }
 
+    /*
+    NEW API
+    */
+
+    /// Get the publicly available settings for the gotrue instance.
+    pub async fn settings(&self) -> anyhow::Result<()> {
+        Ok(())
+    }
+
+    /// Creates a user based on the user_id specified.
+    pub async fn admin_create_user(&self) -> anyhow::Result<()> {
+        Ok(())
+    }
+
+    /// Updates a user based on the user_id specified.
+    pub async fn admin_update_user(&self) -> anyhow::Result<()> {
+        Ok(())
+    }
+
+    /// Generates a corresponding email action link based on the type specified.
+    pub async fn generate_email_action_link(&self) -> anyhow::Result<()> {
+        Ok(())
+    }
+
+    /// Register a new user with an email and password.
+    pub async fn signup(&self) -> anyhow::Result<()> {
+        Ok(())
+    }
+
+    /// Invites a new user with an email.
+    ///
+    /// This method requires the service_role or supabase_admin JWT set as an Auth Bearer header:
+
+    pub async fn invite(&self) -> anyhow::Result<()> {
+        Ok(())
+    }
+
+    /// Verify a registration or a password recovery.
+    pub async fn verify_registration_or_recovery(&self) -> anyhow::Result<()> {
+        Ok(())
+    }
+
+    ///  Delivers a magiclink or sms otp to the user depending on whether the request body contains an "email" or "phone" key.
+    pub async fn send_new_otp(&self) -> anyhow::Result<()> {
+        Ok(())
+    }
+
+    /// Send a password recovery mail to the user based on email address.
+    pub async fn send_password_recovery(&self) -> anyhow::Result<()> {
+        Ok(())
+    }
+
+    /// This is an OAuth2 endpoint that currently implements the password and refresh_token grant types.
+    pub async fn oauth2_token(&self) -> anyhow::Result<()> {
+        Ok(())
+    }
+
+    /// Get the JSON object for the logged in user.
+    pub async fn get_new_user(&self) -> anyhow::Result<()> {
+        Ok(())
+    }
+
+    /// Sends a nonce to the user's email (preferred) or phone.
+    /// This endpoint requires the user to be logged in / authenticated first.
+    /// The user needs to have either an email or phone number for the nonce to be sent successfully.
+    pub async fn reauth(&self) -> anyhow::Result<()> {
+        Ok(())
+    }
+
+    /// Logout a user (Requires authentication).
+    /// This will revoke all refresh tokens for the user.
+    /// Remember that the JWT tokens will still be valid for stateless auth until they expires.
+    pub async fn sign_out_new(&self) -> anyhow::Result<()> {
+        Ok(())
+    }
+
+    /// Get access_token from external oauth provider
+    pub async fn external_authorize(&self) -> anyhow::Result<()> {
+        Ok(())
+    }
+
+    /// Recieve a external authorize callback.
+    pub async fn external_callback(&self) -> anyhow::Result<()> {
+        Ok(())
+    }
+
+    /*
+    Old API
+     */
     /// Add arbitrary headers to the request. For instance when you may want to connect
     /// through an API gateway that needs an API key header.
     ///
