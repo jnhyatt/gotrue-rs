@@ -6,6 +6,10 @@ GoTrue exposes the following endpoints:
 
 Returns the publicly available settings for this gotrue instance.
 
+<details>
+<summary>Request/Response</summary>
+### Response
+
 ```json
 {
   "external": {
@@ -31,10 +35,14 @@ Returns the publicly available settings for this gotrue instance.
   "autoconfirm": false
 }
 ```
+</details>
+
 
 ## **POST `/admin/users/<user_id>`**
 
 Creates (POST) the user based on the `user_id` specified. The `ban_duration` field accepts the following time units: "ns", "us", "ms", "s", "m", "h". See [`time.ParseDuration`](https://pkg.go.dev/time#ParseDuration) for more details on the format used.
+
+### Request
 
 ```js
 headers:
@@ -60,6 +68,8 @@ body:
 
 Updates (PUT) the user based on the `user_id` specified. The `ban_duration` field accepts the following time units: "ns", "us", "ms", "s", "m", "h". See [`time.ParseDuration`](https://pkg.go.dev/time#ParseDuration) for more details on the format used.
 
+### Request
+
 ```js
 headers:
 {
@@ -83,6 +93,8 @@ body:
 ## **POST `/admin/generate_link`**
 
 Returns the corresponding email action link based on the type specified. Among other things, the response also contains the query params of the action link as separate JSON fields for convenience (along with the email OTP from which the corresponding token is generated).
+
+### Request
 
 ```js
 headers:
