@@ -1,3 +1,5 @@
+mod settings;
+
 use reqwest::header::{HeaderMap, HeaderValue, IntoHeaderName};
 use serde_json::json;
 
@@ -46,11 +48,6 @@ impl Client {
     /*
     NEW API
     */
-
-    /// Get the publicly available settings for the gotrue instance.
-    pub async fn settings(&self) -> anyhow::Result<()> {
-        Ok(())
-    }
 
     /// Creates a user based on the user_id specified.
     pub async fn admin_create_user(&self) -> anyhow::Result<()> {
