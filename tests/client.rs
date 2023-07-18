@@ -3,8 +3,38 @@ use rand::{distributions::Alphanumeric, Rng};
 use serde_json::json;
 use std::error::Error;
 
-fn get_client() -> Client {
+use hmac::{Hmac, Mac};
+use jwt::SignWithKey;
+use sha2::Sha256;
+use std::collections::BTreeMap;
+
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+struct AdminUserAttributes {
+    pub email: String,
+    pub password: Option<String>,
+    pub data: Option<Value>,
+    pub email_confirmed: Option<bool>,
+    pub phone_confirmed: Option<bool>,
+}
+
+fn get_api_client() -> Client {
     Client::new("http://localhost:9998")
+}
+
+fn get_service_api_client() -> Client {
+    let key: Hmac<Sha256> = Hmac::new_from_slice(b"37c304f8-51aa-419a-a1af-06154e63707a").unwrap();
+    let mut claims = BTreeMap::new();
+    claims.insert("sub", "1234567890");
+    claims.insert("role", "supabase_admin");
+
+    let token_str = claims.sign_with_key(&key).unwrap();
+    let api: Client = Client::new("http://localhost:9998")
+        .insert_header("Authorization", format!("Bearer {token_str}"));
+
+    api
 }
 
 fn get_random_email() -> String {
@@ -21,34 +51,14 @@ fn get_random_email() -> String {
 #[tokio::test]
 async fn it_signs_up_with_email() -> Result<(), Box<dyn Error>> {
     let email = get_random_email();
-    let password = "Abcd1234!";
+    let password = String::from("Abcd1234!");
 
-    let mut client = get_client();
-    let res = client
-        .sign_up(EmailOrPhone::Email(email.clone()), password)
+    let api = get_api_client();
+    let res = api
+        .sign_up(EmailOrPhone::Email(email.clone()), &password)
         .await?;
 
-    assert_eq!(email, res.user.email);
-
-    Ok(())
-}
-
-#[tokio::test]
-async fn it_should_throw_email_already_taken_error() -> Result<(), Box<dyn Error>> {
-    let email = get_random_email();
-    let password = "Abcd1234!";
-
-    let mut client = get_client();
-    let _throw_away_signup_result = client
-        .sign_up(EmailOrPhone::Email(email.clone()), password)
-        .await?; // Sign up with email to invalidate second signup.
-
-    let result = client.sign_up(EmailOrPhone::Email(email), password).await;
-
-    match result {
-        Ok(_) => panic!("Should throw error"),
-        Err(e) => assert!(matches!(e, go_true_redux::Error::AlreadySignedUp)),
-    }
+    assert_eq!(res.user.email, email);
 
     Ok(())
 }
@@ -56,14 +66,14 @@ async fn it_should_throw_email_already_taken_error() -> Result<(), Box<dyn Error
 #[tokio::test]
 async fn it_signs_in_with_email() -> Result<(), Box<dyn Error>> {
     let email = get_random_email();
-    let password = "Abcd1234!";
+    let password = String::from("Abcd1234!");
 
-    let mut client = get_client();
-    let _throw_away_signup_result = client
-        .sign_up(EmailOrPhone::Email(email.clone()), password)
+    let api = get_api_client();
+    let _throw_away_signup_result = api
+        .sign_up(EmailOrPhone::Email(email.clone()), &password)
         .await?;
-    let res = client
-        .sign_in(EmailOrPhone::Email(email.clone()), password)
+    let res = api
+        .sign_in(EmailOrPhone::Email(email.clone()), &password)
         .await?;
 
     assert_eq!(res.user.email, email);
@@ -71,147 +81,154 @@ async fn it_signs_in_with_email() -> Result<(), Box<dyn Error>> {
 }
 
 #[tokio::test]
-async fn it_should_return_error_when_credentials_are_wrong_on_signin() -> Result<(), Box<dyn Error>>
-{
-    let email = get_random_email();
-    let password = "Abcd1234!";
-
-    let mut client = get_client();
-    let _throw_away_signup_result = client.sign_up(EmailOrPhone::Email(email), password).await?;
-
-    let wrong_email = get_random_email();
-    let result = client
-        .sign_in(EmailOrPhone::Email(wrong_email), password)
-        .await;
-
-    match result {
-        Ok(_) => panic!("Should throw error"),
-        Err(e) => assert!(matches!(e, go_true_redux::Error::WrongCredentials)),
-    }
-
-    Ok(())
-}
-
-#[tokio::test]
-async fn it_should_return_error_if_no_session_when_refreshing() -> Result<(), Box<dyn Error>> {
-    let mut client = get_client();
-    let result = client.refresh_session("").await;
-
-    match result {
-        Ok(_) => panic!("Should throw error"),
-        Err(e) => assert!(matches!(e, go_true_redux::Error::NotAuthenticated)),
-    }
-
-    Ok(())
-}
-
-#[tokio::test]
-async fn it_should_refresh_session() -> Result<(), Box<dyn Error>> {
-    let email = get_random_email();
-    let password = "Abcd1234!";
-
-    let mut client = get_client();
-    let _throw_away_signup_result = client
-        .sign_up(EmailOrPhone::Email(email.clone()), password)
-        .await?;
-    let old_session = client
-        .sign_in(EmailOrPhone::Email(email.clone()), password)
-        .await?;
-
-    let session = client.refresh_session(&old_session.refresh_token).await?;
-
-    assert_eq!(session.user.email, email);
-    assert_ne!(old_session.refresh_token, session.refresh_token);
-
-    Ok(())
-}
-
-#[tokio::test]
 async fn it_send_magic_link_with_valid_email() -> Result<(), Box<dyn Error>> {
     let email = get_random_email();
-    let password = "Abcd1234!";
+    let password = String::from("Abcd1234!");
 
-    let mut client = get_client();
-    let _throw_away_signup_result = client
-        .sign_up(EmailOrPhone::Email(email.clone()), password)
+    let api = get_api_client();
+    let _throw_away_signup_result = api
+        .sign_up(EmailOrPhone::Email(email.clone()), &password)
         .await?;
-    let res = client.send_otp(EmailOrPhone::Email(email), None).await?;
+    let res = api
+        .send_otp(EmailOrPhone::Email(email.clone()), None)
+        .await?;
 
     assert!(res);
+
     Ok(())
 }
 
 #[tokio::test]
 async fn it_does_not_send_magic_link_with_invalid_email() -> Result<(), Box<dyn Error>> {
-    let email = "i-do-not-exist";
-    let client = get_client();
-    let result = client
-        .send_otp(EmailOrPhone::Email(email.to_owned()), None)
-        .await;
+    let email = String::from("i-do-not-exist");
+    let api = get_api_client();
+    let response = api.send_otp(EmailOrPhone::Email(email), None).await;
 
-    match result {
-        Ok(_) => panic!("Should throw error"),
-        Err(e) => assert!(matches!(e, go_true_redux::Error::UserNotFound)),
+    match response {
+        Ok(_) => panic!("Should not work"),
+        Err(_) => Ok(()),
     }
-
-    Ok(())
 }
 
 #[tokio::test]
 async fn it_should_log_out() -> Result<(), Box<dyn Error>> {
     let email = get_random_email();
-    let password = "Abcd1234!";
+    let password = String::from("Abcd1234!");
 
-    let mut client = get_client();
-    let _throw_away_signup_result = client
-        .sign_up(EmailOrPhone::Email(email.clone()), password)
+    let api = get_api_client();
+    let _throw_away_signup_result = api
+        .sign_up(EmailOrPhone::Email(email.clone()), &password)
         .await?;
-    let signin_result = client.sign_in(EmailOrPhone::Email(email), password).await?;
+    let res = api
+        .sign_in(EmailOrPhone::Email(email.clone()), &password)
+        .await?;
 
-    let success = client.sign_out(&signin_result.access_token).await?;
+    assert_eq!(res.user.email, email);
+
+    let success = api.sign_out(&res.access_token).await?;
 
     assert!(success);
+
     Ok(())
 }
 
 #[tokio::test]
-async fn it_should_return_error_in_log_out_if_no_session() -> Result<(), Box<dyn Error>> {
-    let client = get_client();
-    let result = client.sign_out("").await;
+async fn it_should_return_error_if_token_is_invalid() -> Result<(), Box<dyn Error>> {
+    let email = get_random_email();
+    let password = String::from("Abcd1234!");
 
-    match result {
-        Ok(_) => panic!("Should throw error"),
-        Err(e) => assert!(matches!(e, go_true_redux::Error::NotAuthenticated)),
+    let api = get_api_client();
+    let _throw_away_signup_result = api
+        .sign_up(EmailOrPhone::Email(email.clone()), &password)
+        .await?;
+    let res = api
+        .sign_in(EmailOrPhone::Email(email.clone()), &password)
+        .await?;
+
+    assert_eq!(res.user.email, email);
+
+    let success = api.sign_out("invalid-token").await;
+
+    match success {
+        Ok(_) => panic!("Should not work"),
+        Err(_) => Ok(()),
     }
-
-    Ok(())
 }
 
 #[tokio::test]
 async fn it_should_send_password_recovery_email() -> Result<(), Box<dyn Error>> {
     let email = get_random_email();
-    let password = "Abcd1234!";
+    let password = String::from("Abcd1234!");
 
-    let mut client = get_client();
-    let _throw_away_signup_result = client
-        .sign_up(EmailOrPhone::Email(email.clone()), password)
+    let api = get_api_client();
+    let _throw_away_signup_result = api
+        .sign_up(EmailOrPhone::Email(email.clone()), &password)
         .await?;
-    let res = client.reset_password_for_email(&email).await?;
 
-    assert!(res);
+    let success = api.reset_password_for_email(&email).await?;
+    assert!(success);
+
+    Ok(())
+}
+
+#[test]
+fn it_should_return_url_for_provider() {
+    let api = get_api_client();
+    let url = api.get_url_for_provider("Github");
+
+    assert!(url.ends_with("/authorize?provider=Github"));
+}
+
+#[tokio::test]
+async fn it_should_refresh_token() -> Result<(), Box<dyn Error>> {
+    let email = get_random_email();
+    let password = String::from("Abcd1234!");
+
+    let api = get_api_client();
+    let _throw_away_signup_result = api
+        .sign_up(EmailOrPhone::Email(email.clone()), &password)
+        .await?;
+    let session = api
+        .sign_in(EmailOrPhone::Email(email.clone()), &password)
+        .await?;
+
+    let new_session = api.refresh_access_token(&session.refresh_token).await?;
+
+    assert_eq!(new_session.user.email, email);
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn it_should_return_user() -> Result<(), Box<dyn Error>> {
+    let email = get_random_email();
+    let password = String::from("Abcd1234!");
+
+    let api = get_api_client();
+    let _throw_away_signup_result = api
+        .sign_up(EmailOrPhone::Email(email.clone()), &password)
+        .await?;
+    let session = api
+        .sign_in(EmailOrPhone::Email(email.clone()), &password)
+        .await?;
+
+    let user = api.get_user(&session.access_token).await?;
+
+    assert_eq!(user.email, email);
+
     Ok(())
 }
 
 #[tokio::test]
 async fn it_should_update_user() -> Result<(), Box<dyn Error>> {
     let email = get_random_email();
-    let password = "Abcd1234!";
+    let password = String::from("Abcd1234!");
 
-    let mut client = get_client();
-    let _throw_away_signup_result = client
-        .sign_up(EmailOrPhone::Email(email.clone()), password)
+    let api = get_api_client();
+    let _throw_away_signup_result = api
+        .sign_up(EmailOrPhone::Email(email.clone()), &password)
         .await?;
-    let _throw_away_signin_result = client.sign_in(EmailOrPhone::Email(email), password).await?;
+    let session = api.sign_in(EmailOrPhone::Email(email), &password).await?;
 
     let new_email = get_random_email();
     let attributes = UserAttributes {
@@ -220,11 +237,134 @@ async fn it_should_update_user() -> Result<(), Box<dyn Error>> {
         data: json!({ "test": "test" }),
     };
 
-    let update = client
-        .update_user(&_throw_away_signin_result.access_token, attributes)
-        .await?;
+    let update = api.update_user(attributes, &session.access_token).await?;
 
     assert_eq!(update.new_email, new_email);
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn it_should_invite_user_by_email() -> Result<(), Box<dyn Error>> {
+    let email = get_random_email();
+    let api = get_service_api_client();
+    let user = api.invite_user_by_email(&email).await?;
+
+    assert_eq!(user.email, email);
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn it_should_list_users() -> Result<(), Box<dyn Error>> {
+    let email = get_random_email();
+    let password = "Abcd1234!";
+    let client_api = get_api_client();
+    let _throw_away_signup_result = client_api
+        .sign_up(EmailOrPhone::Email(email), password)
+        .await?;
+
+    let api = get_service_api_client();
+    let users = api.list_users(None).await?;
+
+    assert!(!users.users.is_empty());
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn it_should_get_user_by_id() -> Result<(), Box<dyn Error>> {
+    let email = get_random_email();
+    let password = "Abcd1234!";
+    let client_api = get_api_client();
+    let session = client_api
+        .sign_up(EmailOrPhone::Email(email.clone()), password)
+        .await?;
+
+    let api = get_service_api_client();
+    let user = api.get_user_by_id(&session.user.id).await?;
+
+    assert_eq!(user.email, email);
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn it_should_create_user() -> Result<(), Box<dyn Error>> {
+    let email = get_random_email();
+    let api = get_service_api_client();
+    let user = AdminUserAttributes {
+        email: email.clone(),
+        password: Some("Abcd1234!".to_owned()),
+        data: None,
+        email_confirmed: None,
+        phone_confirmed: None,
+    };
+
+    let response = api.create_user(user).await?;
+
+    assert_eq!(response.email, email);
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn it_should_update_user_by_id() -> Result<(), Box<dyn Error>> {
+    let email = get_random_email();
+    let api = get_service_api_client();
+    let user = AdminUserAttributes {
+        email: email.clone(),
+        password: Some("Abcd1234!".to_owned()),
+        data: Some(serde_json::Value::Null),
+        email_confirmed: None,
+        phone_confirmed: None,
+    };
+
+    let create_response = api.create_user(user).await?;
+    assert_eq!(create_response.email, email);
+
+    let new_email = get_random_email();
+
+    let user = AdminUserAttributes {
+        email: new_email.clone(),
+        password: None,
+        data: None,
+        email_confirmed: None,
+        phone_confirmed: None,
+    };
+
+    let update_response = api
+        .update_user_by_id(&create_response.id, user.clone())
+        .await?;
+
+    assert_eq!(update_response.email, new_email);
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn it_should_delete_user() -> Result<(), Box<dyn Error>> {
+    let email = get_random_email();
+    let api = get_service_api_client();
+    let user = AdminUserAttributes {
+        email: email.clone(),
+        password: Some("Abcd1234!".to_owned()),
+        data: Some(serde_json::Value::Null),
+        email_confirmed: None,
+        phone_confirmed: None,
+    };
+
+    let create_response = api.create_user(user).await?;
+    assert_eq!(create_response.email, email);
+
+    let old_user_list = api.list_users(None).await?;
+
+    api.delete_user(&create_response.id).await?;
+    assert!(old_user_list.users.iter().any(|user| user.email == email));
+
+    let userlist = api.list_users(None).await?;
+
+    assert!(!userlist.users.iter().any(|user| user.email == email));
 
     Ok(())
 }

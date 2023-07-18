@@ -36,7 +36,6 @@
 //! [gotrue]: https://github.com/supabase/gotrue
 //! [readme]: https://github.com/fubinator/gotrue-rs
 
-mod api;
 mod client;
 mod error;
 mod session;
@@ -45,8 +44,7 @@ mod user_attributes;
 mod user_list;
 mod user_update;
 
-pub use api::Api;
-pub use api::EmailOrPhone;
 pub use client::Client;
+pub use client::EmailOrPhone;
 pub use error::Error;
 pub use user_attributes::UserAttributes;
