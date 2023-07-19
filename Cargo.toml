@@ -19,6 +19,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 thiserror = "1.0"
 anyhow = "1.0.71"
+tracing = "0.1.37"
 
 [dev-dependencies]
 hmac = "0.12.1"
@@ -27,3 +28,5 @@ rand = "0.8.5"
 sha2 = "0.10.2"
 tokio = { version = "1.20.4", features = ["macros"] }
 anyhow = "1.0.71"
+testcontainers = { version = "0.14.0", features = ["experimental"] }
+tracing-subscriber = "0.3.17"

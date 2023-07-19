@@ -1,4 +1,4 @@
-mod settings;
+pub mod settings;
 
 use reqwest::header::{HeaderMap, HeaderValue, IntoHeaderName};
 use serde_json::json;

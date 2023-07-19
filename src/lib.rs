@@ -44,6 +44,7 @@ mod user_attributes;
 mod user_list;
 mod user_update;
 
+pub use client::settings::Settings;
 pub use client::Client;
 pub use client::EmailOrPhone;
 pub use error::Error;
