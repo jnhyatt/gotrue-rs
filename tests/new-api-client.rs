@@ -1,18 +1,12 @@
 use std::collections::BTreeMap;
 
-use anyhow::Context;
+
 use go_true_redux::{Client, Settings};
 
 use hmac::{Hmac, Mac};
 use jwt::SignWithKey;
 use sha2::Sha256;
 
-use testcontainers::*;
-use testcontainers::{
-    clients::{self, Cli},
-    images::generic::GenericImage,
-    Container, Image,
-};
 use tracing::info;
 
 fn get_api_client() -> Client {
