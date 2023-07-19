@@ -1,13 +1,13 @@
 # gotrue-rs-redux
 
-> :exclamation: This is a fork of [Fubinator's gotrue-rs](https://github.com/Fubinator/gotrue-rs). While functionally similar, it has breaking API changes and a more expansive documentation. Credit is given to Fubinator for a vast majority of the development.
+> :exclamation: This is a fork of [Fubinator's gotrue-rs](https://github.com/Fubinator/gotrue-rs). While functionally similar, it has breaking API changes and a more expansive documentation. Credit is given to Fubinator for a base of the development.
 
 
 [![Rust](https://github.com/j7nw4r/gotrue-rs-redux/actions/workflows/ci.yml/badge.svg)](https://github.com/j7nw4r/gotrue-rs-redux/actions/workflows/ci.yml)
 [![Crate](https://img.shields.io/crates/v/go_true_redux.svg)](https://crates.io/crates/go_true_redux)
 [![License: MIT](https://img.shields.io/crates/l/go_true_redux.svg)](#license)
 
-This is a [GoTrue](https://github.com/supabase/gotrue) client implementation in rust. The library is currently under development. Most of the features are already built in, but there are still some changes to be made and everything still needs to be documented. 
+This is a [GoTrue](https://github.com/supabase/gotrue) client implementation in Rust. The library is currently under development.
 
 ## Usage
 Add the following line to your `Cargo.toml`:
@@ -18,7 +18,7 @@ go_true_redux = "0.2.2"
 
 ## Examples
 
-To create an account, create a new client and execute the `sign_up` function with email and password:
+To create an User, create a new client and execute the `sign_up` function with email and password:
 
 ```rust
 use go_true_redux::Client;

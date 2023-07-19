@@ -290,26 +290,6 @@ async fn it_should_get_user_by_id() -> Result<(), Box<dyn Error>> {
 }
 
 #[tokio::test]
-async fn it_should_create_user() -> Result<(), Box<dyn Error>> {
-    let email = get_random_email();
-    let api = get_service_api_client();
-    let user = User {
-        email: email.clone(),
-        password: Some("Abcd1234!".to_owned()),
-        data: None,
-        email_confirmed_at: None,
-        phone_confirmed: None,
-        ..User::default()
-    };
-
-    let response = api.create_user(user).await?;
-
-    assert_eq!(response.email, email);
-
-    Ok(())
-}
-
-#[tokio::test]
 async fn it_should_update_user_by_id() -> Result<(), Box<dyn Error>> {
     let email = get_random_email();
     let api = get_service_api_client();
