@@ -1,11 +1,15 @@
+pub mod create_user;
 pub mod settings;
 
-use reqwest::header::{HeaderMap, HeaderValue, IntoHeaderName};
+use reqwest::{
+    header::{HeaderMap, HeaderValue, IntoHeaderName},
+    StatusCode,
+};
 use serde_json::json;
 
 use crate::{
     session::Session, user::User, user_attributes::UserAttributes, user_list::UserList,
-    user_update::UserUpdate,
+    user_update::UserUpdate, Error,
 };
 
 ///
@@ -680,50 +684,6 @@ impl Client {
         Ok(user)
     }
 
-    /// Creates a user
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use go_true::{Api};
-    ///
-    /// #[tokio::main]
-    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let url = "http://localhost:9998".to_string();
-    ///     let mut client = Api::new(url);
-    ///
-    ///     let user = AdminUserAttributes {
-    ///         email: "createemail@example.com",
-    ///         password: Some(String::from("Abcd1234!")),
-    ///         data: None,
-    ///         email_confirmed: None,
-    ///         phone_confirmed: None,
-    ///     };
-
-    ///     client.create_user(user).await?;
-    ///
-    ///     Ok(())
-    /// }
-    /// ```
-    pub async fn create_user<T: serde::Serialize>(&self, user: T) -> Result<User, reqwest::Error> {
-        let endpoint = format!("{}/admin/users", self.url);
-
-        let json = serde_json::to_value(&user).unwrap();
-
-        let client = reqwest::Client::new();
-        let user: User = client
-            .post(endpoint)
-            .headers(self.headers.clone())
-            .json(&json)
-            .send()
-            .await?
-            .error_for_status()?
-            .json()
-            .await?;
-
-        Ok(user)
-    }
-
     /// Updates a user by id
     ///
     /// # Example
@@ -821,4 +781,11 @@ impl Client {
 
         Ok(true)
     }
+}
+
+fn handle_gotrue_resp_status(status_code: StatusCode) -> Result<(), Error> {
+    if status_code.is_success() {
+        return Ok(());
+    }
+    Ok(())
 }

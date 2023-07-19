@@ -48,4 +48,5 @@ pub use client::settings::Settings;
 pub use client::Client;
 pub use client::EmailOrPhone;
 pub use error::Error;
+pub use user::User;
 pub use user_attributes::UserAttributes;

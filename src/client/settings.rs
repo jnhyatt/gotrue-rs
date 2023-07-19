@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use tracing::debug;
+use tracing::{debug, error};
 
-use crate::Client;
+use crate::{client::handle_gotrue_resp_status, Client, Error};
 
 /// Represents the settings of a GoTrue instances.
 #[derive(Debug, Default, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
@@ -18,19 +18,37 @@ pub struct Settings {
 
 impl Client {
     /// Get the publicly available settings for the GoTrue instance.
-    pub async fn get_settings(&self) -> anyhow::Result<Settings> {
+    pub async fn get_settings(&self) -> Result<Settings, Error> {
         let endpoint = format!("{}/settings", self.url);
+
         debug!("calling {}", endpoint);
-        let response: Settings = self
+        let resp = match self
             .client
             .get(endpoint)
             .headers(self.headers.clone())
             .send()
-            .await?
-            .error_for_status()?
-            .json::<Settings>()
-            .await?;
+            .await
+        {
+            Ok(resp) => resp,
+            Err(e) => {
+                error!("could not make request to gotrue: {}", e);
+                return Err(Error::InternalError);
+            }
+        };
 
-        Ok(response)
+        if let Err(e) = handle_gotrue_resp_status(resp.status()) {
+            error!("gotrue returned an error status: {}", resp.status());
+            return Err(e);
+        }
+
+        let settings = match resp.json::<Settings>().await {
+            Ok(settings) => settings,
+            Err(e) => {
+                error!("could not deserialize the response into settings: {}", e);
+                return Err(Error::InternalError);
+            }
+        };
+
+        Ok(settings)
     }
 }
