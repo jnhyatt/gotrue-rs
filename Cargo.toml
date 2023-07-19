@@ -14,7 +14,7 @@ categories = ["development-tools"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-reqwest = { version = "0.11.11", features = ["json", "blocking"] }
+reqwest = { version = "0.11.11", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 thiserror = "1.0"
@@ -28,5 +28,5 @@ rand = "0.8.5"
 sha2 = "0.10.2"
 tokio = { version = "1.20.4", features = ["macros"] }
 anyhow = "1.0.71"
-testcontainers = { version = "0.14.0", features = ["experimental"] }
+# testcontainers = { version = "0.14.0", features = ["experimental"] }
 tracing-subscriber = "0.3.17"
