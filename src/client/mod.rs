@@ -144,7 +144,7 @@ impl Client {
     /// let client = Api::new("https://your.gotrue.endpoint")
     ///     .insert_header("apikey", "super.secret.key");
     /// ```
-    pub fn insert_header(
+    pub fn with_header(
         mut self,
         header_name: impl IntoHeaderName,
         header_value: impl AsRef<str>,
